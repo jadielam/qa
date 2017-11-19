@@ -183,31 +183,34 @@ class DataParser():
             for article in dataset:
                 for paragraph in article["paragraphs"]:
                     context = paragraph["context"]
-                    tok_context = self.nlp.tokenize_text(context)
-                    if tok_context is None:
+                    tok_contexts = self.nlp.tokenize_text(context) if is_dev \
+                        else self.nlp.tokenize_text_into_shuffled_sentences(context)
+                    if tok_contexts is None:
                         continue
-                    ctx_offset_dict = {}
-                    for tok in tok_context:
-                        ctx_offset_dict[tok.start] = tok
-                    ctx_end_offset_dict = {}
-                    for tok in tok_context:
-                        ctx_end_offset_dict[tok.end] = tok
-                    for qa in paragraph["qas"]:
-                        self.question_id += 1
-                        question = qa["question"]
-                        tok_question = self.nlp.tokenize_text(question)
-                        if tok_question is None:
-                            continue
-                        found_answer_in_context = False
-                        found_answer_in_context = self._maybe_add_samples(
-                                tok_context, tok_question, qa, ctx_offset_dict,
-                                ctx_end_offset_dict, list_contexts,
-                                list_word_in_question, list_questions,
-                                list_word_in_context, spans, num_values,
-                                text_tokens, question_ids,
-                                question_ids_to_ground_truths, context_chars,
-                                question_chars, context_pos, question_pos,
-                                context_ner, question_ner, is_dev)
+                    for tok_context in tok_contexts:
+                        ctx_offset_dict = {}
+                        for tok in tok_context:
+                            ctx_offset_dict[tok.start] = tok
+                        ctx_end_offset_dict = {}
+                        for tok in tok_context:
+                            ctx_end_offset_dict[tok.end] = tok
+                        for qa in paragraph["qas"]:
+                            self.question_id += 1
+                            question = qa["question"]
+                            tok_questions = self.nlp.tokenize_text(question)
+                            if tok_questions is None:
+                                continue
+                            tok_question = tok_questions[0]
+                            found_answer_in_context = False
+                            found_answer_in_context = self._maybe_add_samples(
+                                    tok_context, tok_question, qa, ctx_offset_dict,
+                                    ctx_end_offset_dict, list_contexts,
+                                    list_word_in_question, list_questions,
+                                    list_word_in_context, spans, num_values,
+                                    text_tokens, question_ids,
+                                    question_ids_to_ground_truths, context_chars,
+                                    question_chars, context_pos, question_pos,
+                                    context_ner, question_ner, is_dev)
             print("")
             spans = np.array(spans[:self.value_idx], dtype=np.int32)
             return RawTrainingData(

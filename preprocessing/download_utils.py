@@ -6,6 +6,8 @@ import zipfile
 
 def download_file_with_progress(url, filename):
     def display_progress(current_blocks, block_size_bytes, total_size):
+        if total_size <= 0:
+            return
         sys.stdout.write("Download progress: %d%%   \r" % int(current_blocks * block_size_bytes * 100.0 / total_size) )
         sys.stdout.flush()
     print("Downloading file", filename, "from url", url)

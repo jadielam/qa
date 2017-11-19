@@ -6,6 +6,7 @@ import os
 
 from train.train_util import *
 from train.evaluation_functions import *
+from util.string_util import utf8_str
 
 class _EvalResult:
     def __init__(self, em, f1, passages, questions, text_predictions, ground_truths):
@@ -15,9 +16,6 @@ class _EvalResult:
         self.questions = questions
         self.text_predictions = text_predictions
         self.ground_truths = ground_truths
-
-def _utf8_str(obj):
-    return str(str(obj).encode("utf-8"))
 
 def evaluate_train(session, towers, squad_dataset, options, tf_dataset):
     """Returns dev (exact match, f1)"""
@@ -57,13 +55,13 @@ def evaluate_dev_and_visualize(session, towers, squad_dataset, options, tf_datas
     spn_file = open(os.path.join(options.evaluation_dir, "predicted_spans.visualization.txt"), mode="w")
     print("Writing context, question, ground truth, and predictions to files in evaluation dir [" + options.evaluation_dir + "]")
     for z in range(len(result.passages)):
-        ctx_file.write(_utf8_str(result.passages[z]))
+        ctx_file.write(utf8_str(result.passages[z]))
         ctx_file.write("\n")
-        qst_file.write(_utf8_str(result.questions[z]))
+        qst_file.write(utf8_str(result.questions[z]))
         qst_file.write("\n")
-        gnd_span_file.write(_utf8_str(result.ground_truths[z]))
+        gnd_span_file.write(utf8_str(result.ground_truths[z]))
         gnd_span_file.write("\n")
-        spn_file.write(_utf8_str(result.text_predictions[z]))
+        spn_file.write(utf8_str(result.text_predictions[z]))
         spn_file.write("\n")
     for f in [ctx_file, qst_file, gnd_span_file, spn_file]:
         f.close()
@@ -120,8 +118,8 @@ def _eval(session, towers, squad_dataset, options, tf_dataset, is_train, limit_s
                      batch_number + 1, num_batches), end="\r")
     print("")
     if options.verbose_logging:
-        print("text_predictions", _utf8_str(text_predictions),
-              "ground_truths", _utf8_str(ground_truths))
+        print("text_predictions", utf8_str(text_predictions),
+              "ground_truths", utf8_str(ground_truths))
     exact_match = avg_over_list(exact_match_score, text_predictions,
             ground_truths)
     f1 = avg_over_list(f1_score, text_predictions, ground_truths)

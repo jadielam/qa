@@ -44,6 +44,7 @@ SQUAD_TRAIN_URL = "https://rajpurkar.github.io/SQuAD-explorer/dataset/train-v1.1
 SQUAD_TRAIN_FILE = "train-v1.1.json"
 SQUAD_DEV_URL = "https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v1.1.json"
 SQUAD_DEV_FILE = "dev-v1.1.json"
+ADVERSARIAL_SQUAD_TRAIN_URL = "https://worksheets.codalab.org/rest/bundles/0x1652afb76e5f4d85ac0d5f9780989eef/contents/blob/"
 
 EMBEDDING_FILE = "glove.embedding.npy"
 VOCAB_FILE = "vocab.txt"

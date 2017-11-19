@@ -102,6 +102,14 @@ f.DEFINE_integer("pos_embedding_size", 10, "Size of POS-tagging embedding")
 f.DEFINE_boolean("use_ner_feature", True, "Whether to use named entity " +
         "recognition as an extra feature to be fed into the model.")
 f.DEFINE_integer("ner_embedding_size", 10, "Size of NER embedding")
+f.DEFINE_boolean("shuffle_sentence_order", True, "Whether to shuffle the" +
+        "sentence order in SQuAD training data.")
+f.DEFINE_boolean("use_adversarial_data", True, "Whether to use the" +
+        "'adversarial' SQuAD data for model training." +
+        "See https://arxiv.org/pdf/1707.07328.pdf.")
+f.DEFINE_boolean("add_sentence_ordering_loss", False,
+        "If 'shuffle_sentence_order' is True, then add a component to the" +
+        "model's objective/loss to identify the correct sentence order.")
 
 def get_options_from_flags():
     return tf.app.flags.FLAGS

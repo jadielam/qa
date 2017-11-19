@@ -17,17 +17,20 @@ def download_pretrained_vectors(data_dir="data"):
     download_file_with_progress(constants.VECTORS_URL, zip_file_name)
     unzip_file_and_remove(zip_file_name, data_dir)
 
-def download_squad_data(data_dir="data"):
+def download_squad_data(options, data_dir="data"):
     squad_files = [constants.SQUAD_TRAIN_FILE, constants.SQUAD_DEV_FILE]
     if all(os.path.isfile(os.path.join(data_dir, squad_file)) for squad_file in squad_files):
         print("Already downloaded SQuAD files in directory " + data_dir + ".")
         return
-    download_file_with_progress(constants.SQUAD_TRAIN_URL, os.path.join(data_dir, constants.SQUAD_TRAIN_FILE))
+    train_file_url = constants.SQUAD_TRAIN_URL \
+        if not options.use_adversarial_data \
+        else constants.ADVERSARIAL_SQUAD_TRAIN_URL
+    download_file_with_progress(train_file_url, os.path.join(data_dir, constants.SQUAD_TRAIN_FILE))
     download_file_with_progress(constants.SQUAD_DEV_URL, os.path.join(data_dir, constants.SQUAD_DEV_FILE))
 
-def download_data(data_dir="data"):
+def download_data(options, data_dir="data"):
     if not os.path.exists(data_dir):
         print("Making directory", data_dir)
         os.makedirs(data_dir)
     download_pretrained_vectors(data_dir)
-    download_squad_data(data_dir)
+    download_squad_data(options, data_dir)

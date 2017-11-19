@@ -4,11 +4,24 @@
 import json
 import os
 import preprocessing.constants as constants
+import random
 import re
 import subprocess
 
 from preprocessing.tokenized_word import *
 from pycorenlp import StanfordCoreNLP
+from util.string_util import utf8_str
+
+_SHUFFLES_PER_PASSAGE = 3
+
+# Debug function to print sentences in a list.
+def _get_sentences(annotation_sentences):
+    all_words = []
+    for sentence in annotation_sentences:
+        for token in sentence["tokens"]:
+            all_words.append(token["word"])
+    return " ".join([utf8_str(w) for w in all_words])
+
 
 class StanfordCoreNlpCommunication():
     def __init__(self, data_dir):
@@ -43,23 +56,26 @@ class StanfordCoreNlpCommunication():
             print("Progress", i, "out of", len(text_list))
         return output_list
 
-    def _get_tokenized_words(self, annotation):
-        tokens = []
-        for sentence in annotation["sentences"]:
-            for token in sentence["tokens"]:
-                tokens.append(TokenizedWord(
-                    token["word"],
-                    token["characterOffsetBegin"],
-                    token["characterOffsetEnd"],
-                    token["ner"],
-                    token["pos"]))
-        return tokens
+    def _get_tokenized_words(self, annotation, shuffle):
+        sentences = []
+        num_output_sentences = 1 if not shuffle else _SHUFFLES_PER_PASSAGE
+        for z in range(num_output_sentences):
+            tokens = []
+            s = annotation["sentences"]
+            if shuffle and z > 0: # Keep the first example unshuffled.
+                random.shuffle(s)
+            for sentence in s:
+                for token in sentence["tokens"]:
+                    tokens.append(TokenizedWord(
+                        token["word"],
+                        token["characterOffsetBegin"],
+                        token["characterOffsetEnd"],
+                        token["ner"],
+                        token["pos"]))
+            sentences.append(tokens)
+        return sentences
 
-    def tokenize_text(self, text):
-        """Input: A string
-
-           Output: A list of TokenizedWord's from the text.
-        """
+    def _perform_tokenize_text(self, text, shuffle):
         annotate = self.nlp.annotate(text, properties={
             'annotators': 'tokenize,pos,ner',
             'outputFormat': 'json',
@@ -70,4 +86,19 @@ class StanfordCoreNlpCommunication():
         if isinstance(annotate, str):
             print("Some internal failure happened when using Stanford CoreNLP")
             return None
-        return self._get_tokenized_words(annotate)
+        return self._get_tokenized_words(annotate, shuffle)
+
+    def tokenize_text_into_shuffled_sentences(self, text):
+        """Input: A string
+
+           Output: A list of lists of TokenizedWord's from the text that are
+           shuffled sentences of the text.
+        """
+        return self._perform_tokenize_text(text, shuffle=True)
+
+    def tokenize_text(self, text):
+        """Input: A string
+
+           Output: A list of TokenizedWord's from the text.
+        """
+        return self._perform_tokenize_text(text, shuffle=False)

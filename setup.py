@@ -10,7 +10,7 @@ from flags import get_options_from_flags
 def main(_):
     options = get_options_from_flags()
     data_dir = options.data_dir
-    download_data(data_dir)
+    download_data(options, data_dir)
     download_stanford_corenlp(data_dir)
     split_vocab_and_embedding(data_dir)
     DataParser(data_dir).create_train_data()
